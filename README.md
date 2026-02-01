@@ -1,16 +1,16 @@
-# Blueprint Developer Bootcamp: Data Fetching Assignment
+# Blueprint Developer Bootcamp: Blueprint Event Tracker
 
 ## How This Works: Issue-Driven Development
 
 Your work has been assigned to you via tickets.
 
 1. Open the Issues Tab.
-   - You will see a backlog of "Tickets" (e.g., _The Fake Backend_, _Fetching Data_, _Dynamic Routing_).
-   - These tickets are your instructions.
-2. **Start with "Ticket 1: The Fake Backend"**.
-   - Claim the ticket, write the code, and close it when you're done.
+  - You will see a backlog of "Tickets" (e.g., *Setup, Style*, *Hero*).
+  - These tickets are your instructions.
+2. **Start with "Ticket 1: Setup"**.
+  - Claim the ticket, write the code, and close it when you're done.
 3. **Work at your own pace.**
-   - This curriculum is designed for you to learn how to talk to a server before you learn how to build one.
+  - This curriculum is designed for you to "choose your own adventure." The faster and better you ship, the faster you move to the Intermediate Track.
 
 ---
 
@@ -23,10 +23,10 @@ We have included a test suite (`Playwright`) that acts like a QA engineer. It wi
 Once you clone this repo:
 
 `# 1. Install dependencies`  
-`npm install`
+`npm install`  
 
 `# 2. Run the Grader`  
-`npx playwright test`
+`npx playwright test`  
 
 **If the tests fail:** Read the error message. It will tell you exactly what is missing.
 
@@ -36,18 +36,16 @@ Once you clone this repo:
 
 ## Requirement: Data Attributes
 
-To allow our tests to grade your creative designs, you must use **Data Attributes** to label your sections and elements. You can style your site however you want, as long as these labels exist.
+To allow our tests to grade your creative designs, you must use **Data Attributes** to label your sections. You can style your site however you want, as long as these labels exist.
 
-**Example:**
+**Example:**  
 
-If a ticket asks for `data-testid="events-list"`, your code **must** include:
+If a ticket asks for `data-testid="projects"`, your code **must** include:
 
-```html
-<!-- The Grader finds this: -->
-<div data-testid="events-list" className="my-cool-grid">
-  {/* Your event cards go here */}
-</div>
-```
+`// The Grader finds this:`  
+`<section data-section="projects" className="my-cool-grid">`  
+  `{/* Your project cards go here */}`  
+`</section>`  
 
 ---
 
@@ -55,4 +53,4 @@ If a ticket asks for `data-testid="events-list"`, your code **must** include:
 
 Head over to the Issues Tab and open Ticket #1.
 
-_Note: This is a self-driven module. Your ability to figure things out, read documentation, and unblock yourself is part of this but don't be afraid to reach out for help. We are here if you need anything. Good luck!_
+*Note: This is a self-driven module. Your ability to figure things out, read documentation, and unblock yourself is part of this but don't be afraid to reach out for help. We are here if you need anything. Good luck!*
