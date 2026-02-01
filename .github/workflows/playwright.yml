@@ -1,0 +1,111 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    - name: Install dependencies
+      run: |
+        npm ci
+        if [ -d "events-app" ]; then
+          npm install --prefix events-app
+        fi
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    - name: Run Playwright tests
+      run: npx playwright test --reporter=json > test-results.json || true
+    - name: Process Test Results and Close Issues
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          if (!fs.existsSync('test-results.json')) {
+            console.log('No test results found.');
+            return;
+          }
+          const results = JSON.parse(fs.readFileSync('test-results.json', 'utf8'));
+          
+          const testToIssueMap = {
+            'ticket1.test.ts': 'Ticket 1: Project Setup',
+            'ticket2.test.ts': 'Ticket 2: Fetching Data',
+            'ticket3.test.ts': 'Ticket 3: Dynamic Routing',
+            'ticket4.test.ts': 'Ticket 4: Performance and Context'
+          };
+
+          const passedFiles = new Set();
+          const failedFiles = new Set();
+
+          results.suites.forEach(suite => {
+            const fileName = suite.file;
+            let allPassed = true;
+            
+            const checkSpecs = (s) => {
+              if (s.specs) {
+                s.specs.forEach(spec => {
+                  if (spec.ok === false) allPassed = false;
+                });
+              }
+              if (s.suites) {
+                s.suites.forEach(childSuite => checkSpecs(childSuite));
+              }
+            };
+            
+            checkSpecs(suite);
+            
+            if (allPassed) {
+              passedFiles.add(fileName);
+            } else {
+              failedFiles.add(fileName);
+            }
+          });
+
+          const openIssues = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open'
+          });
+
+          for (const [file, issueTitle] of Object.entries(testToIssueMap)) {
+            const issue = openIssues.data.find(i => i.title === issueTitle);
+            if (issue) {
+              const isPassed = Array.from(passedFiles).some(f => f.includes(file));
+              const isFailed = Array.from(failedFiles).some(f => f.includes(file));
+              
+              if (isPassed && !isFailed) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: `All tests in \`${file}\` passed! Closing this issue.`
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed'
+                });
+                console.log(`Closed issue: ${issueTitle}`);
+              }
+            }
+          }
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30

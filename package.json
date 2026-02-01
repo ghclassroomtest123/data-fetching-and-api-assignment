@@ -1,0 +1,17 @@
+{
+  "name": "data-fetching-assignment",
+  "version": "1.0.0",
+  "description": "Blueprint Developer Bootcamp: Data Fetching Assignment",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.41.0",
+    "json-server": "^0.17.4",
+    "typescript": "^5.3.3"
+  }
+}

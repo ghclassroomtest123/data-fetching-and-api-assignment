@@ -1,0 +1,74 @@
+name: Assign Student Tasks
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Create Issues
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            
+            const tasks = [
+              {
+                title: "Ticket 4: Performance and Context",
+                path: '.github/curriculum/04-performance-context.md',
+                labels: ['frontend', 'performance-and-context']
+              },
+              {
+                title: "Ticket 3: Dynamic Routing",
+                path: '.github/curriculum/03-routing.md',
+                labels: ['frontend', 'routing']
+              },
+              {
+                title: "Ticket 2: Fetching Data",
+                path: '.github/curriculum/02-fetching.md',
+                labels: ['frontend', 'data-fetching']
+              },
+              {
+                title: "Ticket 1: Project Setup",
+                path: '.github/curriculum/01-setup.md',
+                labels: ['setup']
+              }
+            ];
+
+            // Get all open issues to avoid duplicates
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+
+            const existingTitles = existingIssues.data.map(issue => issue.title);
+
+            for (const task of tasks) {
+              if (existingTitles.includes(task.title)) {
+                console.log(`Issue already exists: ${task.title}`);
+                continue;
+              }
+
+              let body = "No content found for this step.";
+              if (fs.existsSync(task.path)) {
+                body = fs.readFileSync(task.path, 'utf8') || body;
+              }
+
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: task.title,
+                body: body,
+                labels: task.labels
+              });
+              console.log(`Created issue: ${task.title}`);
+            }
