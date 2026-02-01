@@ -22,9 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         npm ci
-        if [ -d "events-app" ]; then
-          npm install --prefix events-app
-        fi
+        npm install --prefix events-app
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
@@ -34,10 +32,6 @@ jobs:
       with:
         script: |
           const fs = require('fs');
-          if (!fs.existsSync('test-results.json')) {
-            console.log('No test results found.');
-            return;
-          }
           const results = JSON.parse(fs.readFileSync('test-results.json', 'utf8'));
           
           const testToIssueMap = {
