@@ -64,7 +64,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev --prefix portfolio',
+    command: 'npm run dev --prefix events-app',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
   },
