@@ -33,6 +33,7 @@ jobs:
         script: |
           const fs = require('fs');
           const results = JSON.parse(fs.readFileSync('test-results.json', 'utf8'));
+          console.log('Test Results:', JSON.stringify(results, null, 2));
           
           const testToIssueMap = {
             'ticket1.test.ts': 'Ticket 1: Project Setup',
@@ -44,35 +45,38 @@ jobs:
           const passedFiles = new Set();
           const failedFiles = new Set();
 
-          results.suites.forEach(suite => {
-            const fileName = suite.file;
-            let allPassed = true;
-            
-            const checkSpecs = (s) => {
-              if (s.specs) {
-                s.specs.forEach(spec => {
-                  if (spec.ok === false) allPassed = false;
-                });
+          if (results.suites) {
+            results.suites.forEach(suite => {
+              const fileName = suite.file;
+              let allPassed = true;
+              
+              const checkSpecs = (s) => {
+                if (s.specs) {
+                  s.specs.forEach(spec => {
+                    if (spec.ok === false) allPassed = false;
+                  });
+                }
+                if (s.suites) {
+                  s.suites.forEach(childSuite => checkSpecs(childSuite));
+                }
+              };
+              
+              checkSpecs(suite);
+              
+              if (allPassed) {
+                passedFiles.add(fileName);
+              } else {
+                failedFiles.add(fileName);
               }
-              if (s.suites) {
-                s.suites.forEach(childSuite => checkSpecs(childSuite));
-              }
-            };
-            
-            checkSpecs(suite);
-            
-            if (allPassed) {
-              passedFiles.add(fileName);
-            } else {
-              failedFiles.add(fileName);
-            }
-          });
+            });
+          }
 
           const openIssues = await github.rest.issues.listForRepo({
             owner: context.repo.owner,
             repo: context.repo.repo,
             state: 'open'
           });
+          console.log('Open Issues:', openIssues.data.map(i => i.title));
 
           for (const [file, issueTitle] of Object.entries(testToIssueMap)) {
             const issue = openIssues.data.find(i => i.title === issueTitle);
