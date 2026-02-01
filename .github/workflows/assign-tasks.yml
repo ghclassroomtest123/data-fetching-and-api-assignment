@@ -43,11 +43,11 @@ jobs:
               }
             ];
 
-            // Get all open issues to avoid duplicates
+            // Get all issues (both open and closed) to avoid duplicates
             const existingIssues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              state: 'open'
+              state: 'all'
             });
 
             const existingTitles = existingIssues.data.map(issue => issue.title);
